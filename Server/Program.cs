@@ -1,7 +1,7 @@
 using BlazorSocialNet.Business;
-using BlazorSocialNet.Entities;
+using BlazorSocialNet.Entities.Models.Authentication;
 using BlazorSocialNet.Repository;
-using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,9 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
-builder.Services.AddScoped<IGenericRepository<User>, UserRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAuthentication().AddJwtBearer();
 
 var app = builder.Build();
 
@@ -33,6 +34,9 @@ app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseSwagger();
 app.UseSwaggerUI();

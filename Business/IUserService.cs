@@ -1,9 +1,4 @@
-﻿using BlazorSocialNet.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BlazorSocialNet.Entities.Models.Authentication;
 
 namespace BlazorSocialNet.Business
 {

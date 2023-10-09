@@ -1,8 +1,12 @@
-﻿using System.Security.Cryptography;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using BlazorSocialNet.Business;
-using BlazorSocialNet.Entities;
-using BlazorSocialNet.Entities.Model;
+using BlazorSocialNet.Client.Pages;
+using BlazorSocialNet.Entities.Models.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BlazorSocialNet.Server.Controllers
 {
@@ -11,10 +15,12 @@ namespace BlazorSocialNet.Server.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(IUserService userService)
+        public AuthController(IUserService userService, IConfiguration configuration)
         {
             _userService = userService;
+            _configuration = configuration;
         }
 
         [HttpPost("register")]
@@ -24,15 +30,12 @@ namespace BlazorSocialNet.Server.Controllers
             if (user != null)
                 return BadRequest("User already exists.");
 
-            CreatePasswordHash(request.Password, 
-                out byte[] passwordHash,
-                out byte[] passwordSalt);
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
             user = new User()
             {
                 Email = request.Email,
                 PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt,
                 VerificationToken = CreateRandomToken()
             };
 
@@ -49,10 +52,10 @@ namespace BlazorSocialNet.Server.Controllers
             var user = await _userService.GetUserByEmail(request.Email);
             if (user == null)
             {
-                return BadRequest("User not found.");
+                return BadRequest("Email or password is incorrect.");
             }
 
-            if (!VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
                 return BadRequest("Email or password is incorrect.");
             }
@@ -62,7 +65,9 @@ namespace BlazorSocialNet.Server.Controllers
                 return BadRequest("Not verified!");
             }
 
-            return Ok($"Welcome back, {user.Email}! :)");
+            string token = CreateJWToken(user);
+
+            return Ok(token);
         }
 
         [HttpPost("verify")]
@@ -104,10 +109,9 @@ namespace BlazorSocialNet.Server.Controllers
                 return BadRequest("Invalid Token.");
             }
 
-            CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
             user.PasswordHash = passwordHash;
-            user.PasswordSalt = passwordSalt;
             user.PasswordResetToken = null;
             user.ResetTokenExpires = null;
 
@@ -121,24 +125,27 @@ namespace BlazorSocialNet.Server.Controllers
             return Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
         }
 
-        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        public string CreateJWToken(User user)
         {
-            using (var hmac = new HMACSHA512())
+            List<Claim> claims = new List<Claim>
             {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac
-                    .ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            }
-        }
+                new Claim(ClaimTypes.Name, user.Name)
+            };
 
-        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
-        {
-            using (var hmac = new HMACSHA512(passwordSalt))
-            {
-                var computedHash = hmac
-                    .ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                return computedHash.SequenceEqual(passwordHash);
-            }
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                _configuration.GetSection("AppSettings:Token").Value!));
+
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            var token = new JwtSecurityToken(
+                    claims: claims,
+                    expires: DateTime.Now.AddDays(1),
+                    signingCredentials: credentials
+                );
+
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return jwt;
         }
     }
 }
