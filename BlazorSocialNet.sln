@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorSocialNet.Business", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorSocialNet.Entities", "Entities\BlazorSocialNet.Entities.csproj", "{C4C26ABD-A15E-419E-9FA8-872876257C89}"
 EndProject
-Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Database", "Database\Database.sqlproj", "{BD0CF283-39CE-48A2-AAD8-029A8C18DEE0}"
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "BlazorSocialNet.Database", "Database\BlazorSocialNet.Database.sqlproj", "{BD0CF283-39CE-48A2-AAD8-029A8C18DEE0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

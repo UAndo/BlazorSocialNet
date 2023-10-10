@@ -13,8 +13,17 @@ namespace BlazorSocialNet.Entities.Models.Authentication
         [Column("Email")]
         public string Email { get; set; }
 
-        [Column("Name")]
-        public string Name { get; set; }
+        [Column("Username")]
+        public string Username { get; set; }
+
+        [Column("FirstName")]
+        public string FirstName { get; set; }
+
+        [Column("LastName")]
+        public string LastName { get; set; }
+
+        [Column("Description")]
+        public string? Description { get; set; }
 
         [Column("PasswordHash")] 
         public string PasswordHash { get; set; }
@@ -24,6 +33,15 @@ namespace BlazorSocialNet.Entities.Models.Authentication
 
         [Column("Language")] 
         public string Language { get; set; } = "uk";
+
+        [Column("Location")]
+        public string Location { get; set; }
+
+        [Column("BirthDate")]
+        public DateTime? BirthDate { get; set; }
+
+        [Column("LastActivityAt")]
+        public DateTime? LastActivityAt { get; set; }
 
         [Column("VerificationToken")]
         public string? VerificationToken { get; set; }
@@ -40,7 +58,7 @@ namespace BlazorSocialNet.Entities.Models.Authentication
         public User(string email, string name, string language)
         {
             Email = email;
-            Name = name;
+            Username = name;
             Language = language;
         }
 

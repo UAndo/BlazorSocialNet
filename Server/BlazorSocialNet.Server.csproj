@@ -12,12 +12,14 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.11" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.11" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Client\BlazorSocialNet.Client.csproj" />
     <ProjectReference Include="..\Business\BlazorSocialNet.Business.csproj" />
+    <ProjectReference Include="..\DataAccess\BlazorSocialNet.DataAccess.csproj" />
   </ItemGroup>
 
 

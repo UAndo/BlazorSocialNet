@@ -65,7 +65,7 @@ namespace BlazorSocialNet.Server.Controllers
                 return BadRequest("Not verified!");
             }
 
-            string token = CreateJWToken(user);
+            string token = CreateJwToken(user);
 
             return Ok(token);
         }
@@ -125,10 +125,11 @@ namespace BlazorSocialNet.Server.Controllers
             return Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
         }
 
-        public string CreateJWToken(User user)
+        private string CreateJwToken(User user)
         {
             List<Claim> claims = new List<Claim>
             {
+                new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Name, user.Name)
             };
 

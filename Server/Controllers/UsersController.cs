@@ -16,16 +16,20 @@ namespace BlazorSocialNet.Server.Controllers
             _userService = userService;
         }
 
-        [HttpGet("get-all-users")]
-        public async Task<IEnumerable<User>> GetAllUsers()
+        [HttpGet("get-all-users"), Authorize]
+        public async Task<IActionResult> GetAllUsers()
         {
-            return new List<User>
+            try
             {
-                new User("test@gmail.com", "Andrew", "en"),
-                new User("alicia@gmail.com", "Alicia", "en"),
-                new User("ira@gmail.com", "Ira", "uk"),
-                new User("john@gmail.com", "John", "en"),
-            };
+                var users = await _userService.GetAllUsers();
+                return Ok(users);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return BadRequest("Internal server error.");
+            }
+            
         }
     }
 }
