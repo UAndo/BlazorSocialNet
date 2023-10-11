@@ -22,6 +22,9 @@ namespace BlazorSocialNet.Entities.Models.Authentication
         [Column("LastName")]
         public string LastName { get; set; }
 
+        [Column("PhoneNumber")]
+        public string PhoneNumber { get; set; }
+
         [Column("Description")]
         public string? Description { get; set; }
 
@@ -37,11 +40,28 @@ namespace BlazorSocialNet.Entities.Models.Authentication
         [Column("Location")]
         public string Location { get; set; }
 
+        [Column("Role")]
+        public string Role { get; set; }
+
         [Column("BirthDate")]
         public DateTime? BirthDate { get; set; }
 
         [Column("LastActivityAt")]
         public DateTime? LastActivityAt { get; set; }
+
+        [Column("IsOnline")]
+        public bool? IsOnline
+        {
+            get
+            {
+                if (LastActivityAt.HasValue)
+                {
+                    var timeSinceLastActivity = DateTime.Now - LastActivityAt.Value;
+                    return timeSinceLastActivity.TotalMinutes <= 5;
+                }
+                return false;
+            }
+        }
 
         [Column("VerificationToken")]
         public string? VerificationToken { get; set; }

@@ -6,7 +6,7 @@
     StartedEditingItem="@StartedEditingItem" CanceledEditingItem="@CanceledEditingItem" CommittedItemChanges="@CommittedItemChanges"
     Bordered="true" Dense="true" EditTrigger="@(_editTriggerRowClick ? DataGridEditTrigger.OnRowClick : DataGridEditTrigger.Manual)">
     <Columns>
-        <PropertyColumn Property="x => x.Name" Title="Nr" IsEditable="false" />
+        <PropertyColumn Property="x => x.FirstName" Title="Nr" IsEditable="false" />
         <PropertyColumn Property="x => x.Email" />
         <PropertyColumn Property="x => x.Language" />
         <TemplateColumn Hidden="@(_isCellEditMode || _readOnly || _editTriggerRowClick)" CellClass="d-flex justify-end">
