@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[Users]
 (
-	Id INT PRIMARY KEY IDENTITY,
+	Id uniqueidentifier PRIMARY KEY NOT NULL,
     Email NVARCHAR(255) NOT NULL,
     Username NVARCHAR(255) NOT NULL,
     FirstName NVARCHAR(255) NOT NULL,
@@ -15,6 +15,7 @@
     BirthDate DATETIME,
     LastActivityAt DATETIME,
     IsOnline BIT,
+    IsLocked BIT NOT NULL DEFAULT 0,
     VerificationToken NVARCHAR(255),
     VerifiedAt DATETIME,
     PasswordResetToken NVARCHAR(255),

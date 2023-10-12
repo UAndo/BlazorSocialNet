@@ -3,8 +3,8 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using BlazorSocialNet.Business;
-using BlazorSocialNet.Client.Pages;
 using BlazorSocialNet.Entities.Models.Authentication;
+using BlazorSocialNet.Entities.Models.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -15,35 +15,49 @@ namespace BlazorSocialNet.Server.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IRoleService _roleService;
         private readonly IConfiguration _configuration;
 
-        public AuthController(IUserService userService, IConfiguration configuration)
+        public AuthController(IUserService userService, IRoleService roleService, IConfiguration configuration)
         {
             _userService = userService;
+            _roleService = roleService;
             _configuration = configuration;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserRegisterRequest request)
         {
-            var user = await _userService.GetUserByEmail(request.Email);
-            if (user != null)
-                return BadRequest("User already exists.");
-
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-
-            user = new User()
+            try
             {
-                Email = request.Email,
-                PasswordHash = passwordHash,
-                VerificationToken = CreateRandomToken()
-            };
+                var user = await _userService.GetUserByEmail(request.Email);
+                if (user != null)
+                    return BadRequest("User already exists.");
 
-            var result = await _userService.AddUser(user);
-            if (!result)
-                return BadRequest("Internal server error.");
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-            return Ok("User successfully created!");
+                user = new User()
+                {
+                    Id = new Guid(),
+                    Email = request.Email,
+                    PasswordHash = passwordHash,
+                    VerificationToken = CreateRandomToken()
+                };
+
+                var result = await _userService.AddUser(user);
+                if (!result)
+                    return BadRequest("Internal server error.");
+
+                var roleId = await _roleService.GetRoleIdByName("User");
+
+                await _userService.AddToRoleAsync(user.Id, roleId);
+
+                return Ok("User successfully created!");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("login")]
@@ -131,7 +145,7 @@ namespace BlazorSocialNet.Server.Controllers
             {
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Name, user.FirstName),
-                new Claim(ClaimTypes.Surname, user.LastName)
+                new Claim(ClaimTypes.Surname, user.LastName),
                 new Claim(ClaimTypes.Role, user.Role)
             };
 

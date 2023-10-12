@@ -67,5 +67,9 @@
     <Build Include="Objects\dbo\Tables\Users.sql" />
     <Build Include="Objects\dbo\StoredProcedures\sp_Users_GetByToken.sql" />
     <Build Include="Objects\dbo\StoredProcedures\sp_Users_GetByEmail.sql" />
+    <Build Include="Objects\dbo\Tables\Roles.sql" />
+    <Build Include="Objects\dbo\Tables\UserRoles.sql" />
+    <Build Include="Objects\dbo\StoredProcedures\sp_UserRoles_AddToRole.sql" />
+    <Build Include="Objects\dbo\StoredProcedures\sp_Roles_GetIdByName.sql" />
   </ItemGroup>
 </Project>

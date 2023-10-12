@@ -8,7 +8,7 @@ namespace BlazorSocialNet.Entities.Models.Authentication
     {
         [Key]
         [Column("Id")]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Column("Email")]
         public string Email { get; set; }
@@ -62,6 +62,9 @@ namespace BlazorSocialNet.Entities.Models.Authentication
                 return false;
             }
         }
+
+        [Column("IsLocked")]
+        public bool IsLocked { get; set; }
 
         [Column("VerificationToken")]
         public string? VerificationToken { get; set; }

@@ -78,7 +78,7 @@ namespace BlazorSocialNet.Repository
             return result;
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T> GetByIdAsync(Guid id)
         {
             IEnumerable<T> result = null;
             try
