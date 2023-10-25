@@ -1,14 +1,16 @@
 namespace BlazorSocialNet.Repository
 {
-    public interface IGenericRepository<T>
+    public interface IGenericRepository<TEntity> where TEntity : class
     {
-        Task<T> GetByIdAsync (Guid id);
-        Task<IEnumerable<T>> GetAllAsync();
-        Task<bool> AddAsync(T entity);
-        Task<bool> UpdateAsync(T entity);
-        Task<bool> DeleteAsync(T entity);
-        Task<T> GetSingleAsync<T>(string storedProcedureName, object parameters = null);
-        Task<IEnumerable<T>> GetListAsync<T>(string storedProcedureName, object parameters = null);
-        Task<bool> PerformNonQueryAsync(string storedProcedureName, object parameters = null);
+        Task<TEntity> GetByIdAsync (Guid id);
+        Task<IEnumerable<TEntity>> GetAllAsync();
+        Task<bool> AddAsync(TEntity entity);
+        Task<bool> UpdateAsync(TEntity entity);
+        Task<bool> DeleteAsync(TEntity entity);
+        Task<TEntity> GetSingleAsync(string storedProcedureName, object? parameters = null);
+        Task<IEnumerable<TEntity>> GetListAsync(string storedProcedureName, object? parameters = null);
+        Task<TModel> GetSingleAsync<TModel>(string storedProcedureName, object? parameters = null) where TModel : class;
+        Task<IEnumerable<TModel>> GetListAsync<TModel>(string storedProcedureName, object? parameters = null) where TModel : class;
+        Task<bool> PerformNonQueryAsync(string storedProcedureName, object? parameters = null);
     }
-}
+}   

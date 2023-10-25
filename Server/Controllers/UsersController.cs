@@ -16,7 +16,7 @@ namespace BlazorSocialNet.Server.Controllers
             _userService = userService;
         }
 
-        [HttpGet("get-all-users"), Authorize]
+        [HttpGet("get-all-users")]
         public async Task<IActionResult> GetAllUsers()
         {
             try

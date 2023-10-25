@@ -8,7 +8,7 @@ namespace BlazorSocialNet.Business
         Task<bool> UpdateRole(Role role);
         Task<bool> DeleteRole(Role role);
         Task<Role> GetRoleById(Guid id);
-        Task<Guid> GetRoleIdByName(string name);
+        Task<Guid> GetRoleByName(string name);
         Task<IEnumerable<Role>> GetAllRoles();
     }
 }

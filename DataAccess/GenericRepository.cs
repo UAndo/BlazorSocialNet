@@ -6,10 +6,11 @@ using System.Reflection;
 using System.Text;
 using Dapper;
 using Microsoft.Extensions.Configuration;
+using static Dapper.SqlMapper;
 
 namespace BlazorSocialNet.Repository
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
     {
         private readonly IDbConnection _connection;
         private readonly IConfiguration _configuration;
@@ -20,7 +21,7 @@ namespace BlazorSocialNet.Repository
             _connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
         }
 
-        public async Task<bool> AddAsync(T entity)
+        public async Task<bool> AddAsync(TEntity entity)
         {
             int rowAffected = 0;
             try
@@ -40,7 +41,7 @@ namespace BlazorSocialNet.Repository
             return rowAffected > 0;
         }
 
-        public async Task<bool> DeleteAsync(T entity)
+        public async Task<bool> DeleteAsync(TEntity entity)
         {
             int rowAffected = 0;
             try
@@ -60,15 +61,15 @@ namespace BlazorSocialNet.Repository
             return rowAffected > 0;
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IEnumerable<TEntity>> GetAllAsync()
         {
-            IEnumerable<T> result = null;
+            IEnumerable<TEntity> result = null;
             try
             {
                 string tableName = GetTableName();
                 string query = "SELECT * FROM " + tableName;
 
-                result = await _connection.QueryAsync<T>(query);
+                result = await _connection.QueryAsync<TEntity>(query);
             }
             catch (Exception ex)
             {
@@ -78,16 +79,16 @@ namespace BlazorSocialNet.Repository
             return result;
         }
 
-        public async Task<T> GetByIdAsync(Guid id)
+        public async Task<TEntity> GetByIdAsync(Guid id)
         {
-            IEnumerable<T> result = null;
+            IEnumerable<TEntity> result = null;
             try
             {
                 string tableName = GetTableName();
                 string keyColumn = GetKeyColumnName();
                 string query = "SELECT * FROM " + tableName + " WHERE " + keyColumn + " = " + id;
 
-                result = await _connection.QueryAsync<T>(query);
+                result = await _connection.QueryAsync<TEntity>(query);
             }
             catch (Exception ex)
             {
@@ -97,7 +98,7 @@ namespace BlazorSocialNet.Repository
             return result.FirstOrDefault();
         }
 
-        public async Task<bool> UpdateAsync(T entity)
+        public async Task<bool> UpdateAsync(TEntity entity)
         {
             int rowsEffected = 0;
             try
@@ -133,9 +134,9 @@ namespace BlazorSocialNet.Repository
             return rowsEffected > 0;
         }
 
-        public async Task<T> GetSingleAsync<T>(string storedProcedureName, object parameters = null)
+        public async Task<TModel> GetSingleAsync<TModel>(string storedProcedureName, object? parameters = null) where TModel : class
         {
-            var result = await _connection.QuerySingleOrDefaultAsync<T>(
+            var result = await _connection.QuerySingleOrDefaultAsync<TModel>(
                 storedProcedureName,
                 parameters,
                 commandType: CommandType.StoredProcedure
@@ -144,9 +145,9 @@ namespace BlazorSocialNet.Repository
             return result;
         }
 
-        public async Task<IEnumerable<T>> GetListAsync<T>(string storedProcedureName, object parameters = null)
+        public async Task<IEnumerable<TModel>> GetListAsync<TModel>(string storedProcedureName, object? parameters = null) where TModel : class
         {
-           var result = await _connection.QueryAsync<T>(
+            var result = await _connection.QueryAsync<TModel>(
                 storedProcedureName,
                 parameters,
                 commandType: CommandType.StoredProcedure
@@ -155,7 +156,17 @@ namespace BlazorSocialNet.Repository
             return result;
         }
 
-        public async Task<bool> PerformNonQueryAsync(string storedProcedureName, object parameters = null)
+        public async Task<TEntity> GetSingleAsync(string storedProcedureName, object? parameters = null)
+        {
+            return await GetSingleAsync<TEntity>(storedProcedureName, parameters);
+        }
+
+        public async Task<IEnumerable<TEntity>> GetListAsync(string storedProcedureName, object? parameters = null)
+        {
+            return await GetListAsync<TEntity>(storedProcedureName, parameters);
+        }
+
+        public async Task<bool> PerformNonQueryAsync(string storedProcedureName, object? parameters = null)
         {
             var result = await _connection.ExecuteAsync(
                 storedProcedureName,
@@ -168,7 +179,7 @@ namespace BlazorSocialNet.Repository
 
         private static string GetTableName()
         {
-            var type = typeof(T);
+            var type = typeof(TEntity);
             var tableAttr = type.GetCustomAttribute<TableAttribute>();
             if (tableAttr != null)
             {
@@ -181,7 +192,7 @@ namespace BlazorSocialNet.Repository
 
         public static string GetKeyColumnName()
         {
-            PropertyInfo[] properties = typeof(T).GetProperties();
+            PropertyInfo[] properties = typeof(TEntity).GetProperties();
 
             foreach (PropertyInfo property in properties)
             {
@@ -202,12 +213,12 @@ namespace BlazorSocialNet.Repository
                     return property.Name;
                 }
             }
-            return null;
+            return string.Empty;
         }
 
         private static string GetColumns(bool excludeKey = false)
         {
-            var type = typeof(T);
+            var type = typeof(TEntity);
             var columns = string.Join(", ", type.GetProperties()
                 .Where(p => !excludeKey || !p.IsDefined(typeof(KeyAttribute)))
                 .Select(p =>
@@ -221,7 +232,7 @@ namespace BlazorSocialNet.Repository
 
         protected string GetPropertyNames(bool excludeKey = false)
         {
-            var properties = typeof(T).GetProperties()
+            var properties = typeof(TEntity).GetProperties()
                 .Where(p => !excludeKey || !p.IsDefined(typeof(KeyAttribute)));
             
             var values = string.Join(", ", properties.Select(p => "@" + p.Name));
@@ -231,7 +242,7 @@ namespace BlazorSocialNet.Repository
 
         protected IEnumerable<PropertyInfo> GetProperties(bool excludeKey = false)
         {
-            var properties = typeof(T).GetProperties()
+            var properties = typeof(TEntity).GetProperties()
                 .Where(p => !excludeKey || !p.IsDefined(typeof(KeyAttribute)));
 
             return properties;            
@@ -239,7 +250,7 @@ namespace BlazorSocialNet.Repository
 
         protected string GetKeyPropertyName()
         {
-            var properties = typeof(T).GetProperties()
+            var properties = typeof(TEntity).GetProperties()
                 .Where(p => p.GetCustomAttribute<KeyAttribute>() != null);
             
             if (properties.Any()) 
@@ -247,7 +258,7 @@ namespace BlazorSocialNet.Repository
                 return properties.FirstOrDefault().Name;
             }
 
-            return null;
+            return string.Empty;
         }
     }
 }

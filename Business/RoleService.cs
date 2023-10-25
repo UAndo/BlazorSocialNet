@@ -38,9 +38,9 @@ namespace BlazorSocialNet.Business
             return await _roleRepository.GetByIdAsync(id);
         }
 
-        public async Task<Guid> GetRoleIdByName(string name)
+        public async Task<Role> GetRoleByName(string name)
         {
-            return await _roleRepository.GetSingleAsync<Guid>("sp_Roles_GetIdByName", 
+            return await _roleRepository.GetSingleAsync("sp_Roles_GetIdByName",
                 new { RoleName = name });
         }
 
