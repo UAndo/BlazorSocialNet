@@ -1,0 +1,23 @@
+﻿@page "/roles"
+@inject HttpClient HttpClient
+@inject IDialogService DialogService
+
+<h3>Roles</h3>
+
+<MudButton OnClick="AddRolePopup" Variant="Variant.Filled" Color="Color.Primary">Додати роль</MudButton>
+<RolesDataGrid></RolesDataGrid>
+
+@code {
+    private async Task AddRolePopup()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var parameters = new DialogParameters<AddRolePopup>();
+        var dialog = await DialogService.ShowAsync<AddRolePopup>("Додати роль", options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            //await HttpClient.PostAsJsonAsync("api/")
+        }
+    }
+}

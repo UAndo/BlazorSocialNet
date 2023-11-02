@@ -1,14 +1,13 @@
-﻿@using System.Net.Http.Json
-@using BlazorSocialNet.Entities.Models.Authentication
-@inject HttpClient httpClient
+﻿@using BlazorSocialNet.Entities.Models;
+@using System.Net.Http.Json;
+@using BlazorSocialNet.Client.Services
+@inject IRoleService RoleService
 
-<MudDataGrid T="User" Items="@users" ReadOnly="@_readOnly" EditMode="@(_isCellEditMode ? DataGridEditMode.Cell : DataGridEditMode.Form)"
+<MudDataGrid T="Role" Items="@_roles" ReadOnly="@_readOnly" EditMode="@(_isCellEditMode ? DataGridEditMode.Cell : DataGridEditMode.Form)"
     StartedEditingItem="@StartedEditingItem" CanceledEditingItem="@CanceledEditingItem" CommittedItemChanges="@CommittedItemChanges"
     Bordered="true" Dense="true" EditTrigger="@(_editTriggerRowClick ? DataGridEditTrigger.OnRowClick : DataGridEditTrigger.Manual)">
     <Columns>
-        <PropertyColumn Property="x => x.FirstName" Title="Nr" IsEditable="false" />
-        <PropertyColumn Property="x => x.Email" />
-        <PropertyColumn Property="x => x.Language" />
+        <PropertyColumn Property="x => x.Name" Title="Role name" IsEditable="true" />
         <TemplateColumn Hidden="@(_isCellEditMode || _readOnly || _editTriggerRowClick)" CellClass="d-flex justify-end">
             <CellTemplate>
                 <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
@@ -46,7 +45,7 @@
 </MudExpansionPanels>
 
 @code {
-    private IEnumerable<User> users = new List<User>();
+    private IEnumerable<Role> _roles = new List<Role>();
     private bool _readOnly;
     private bool _isCellEditMode;
     private List<string> _events = new();
@@ -54,21 +53,21 @@
 
     protected override async Task OnInitializedAsync()
     {
-        users = await httpClient.GetFromJsonAsync<List<User>>("api/users/get-all-users");
+        await RoleService.GetRoles();
     }
 
     // events
-    void StartedEditingItem(User item)
+    void StartedEditingItem(Role item)
     {
         _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
     }
 
-    void CanceledEditingItem(User item)
+    void CanceledEditingItem(Role item)
     {
         _events.Insert(0, $"Event = CanceledEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
     }
 
-    void CommittedItemChanges(User item)
+    void CommittedItemChanges(Role item)
     {
         _events.Insert(0, $"Event = CommittedItemChanges, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
     }

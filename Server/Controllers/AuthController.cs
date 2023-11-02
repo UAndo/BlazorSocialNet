@@ -3,8 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using BlazorSocialNet.Business;
-using BlazorSocialNet.Entities.Models.Authentication;
-using BlazorSocialNet.Entities.Models.Authorization;
+using BlazorSocialNet.Entities.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -14,11 +13,11 @@ namespace BlazorSocialNet.Server.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IUserService _userService;
-        private readonly IRoleService _roleService;
+        private readonly IUserManager _userService;
+        private readonly IRoleManager _roleService;
         private readonly IConfiguration _configuration;
 
-        public AuthController(IUserService userService, IRoleService roleService, IConfiguration configuration)
+        public AuthController(IUserManager userService, IRoleManager roleService, IConfiguration configuration)
         {
             _userService = userService;
             _roleService = roleService;
@@ -30,7 +29,7 @@ namespace BlazorSocialNet.Server.Controllers
         {
             try
             {
-                var user = await _userService.GetUserByEmail(request.Email);
+                var user = await _userService.GetByEmail(request.Email);
                 if (user != null)
                     return BadRequest("User already exists.");
 
@@ -44,13 +43,13 @@ namespace BlazorSocialNet.Server.Controllers
                     VerificationToken = CreateRandomToken()
                 };
 
-                var result = await _userService.AddUser(user);
+                var result = await _userService.Add(user);
                 if (!result)
                     return BadRequest("Internal server error.");
 
-                var roleId = await _roleService.GetRoleIdByName("User");
+                var role = await _roleService.GetByName("User");
 
-                await _userService.AddToRoleAsync(user.Id, roleId);
+                await _userService.AddToRole(user.Id, role.Id);
 
                 return Ok("User successfully created!");
             }
@@ -63,7 +62,7 @@ namespace BlazorSocialNet.Server.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserLoginRequest request)
         {
-            var user = await _userService.GetUserByEmail(request.Email);
+            var user = await _userService.GetByEmail(request.Email);
             if (user == null)
             {
                 return BadRequest("Email or password is incorrect.");
@@ -87,14 +86,14 @@ namespace BlazorSocialNet.Server.Controllers
         [HttpPost("verify")]
         public async Task<IActionResult> Verify(string token)
         {
-            var user = await _userService.GetUserByToken(token);
+            var user = await _userService.GetByToken(token);
             if (user == null)
             {
                 return BadRequest("Invalid token.");
             }
 
             user.VerifiedAt = DateTime.UtcNow;
-            await _userService.UpdateUser(user);
+            await _userService.Update(user);
 
             return Ok("User verified! :)");
         }
@@ -102,7 +101,7 @@ namespace BlazorSocialNet.Server.Controllers
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(string email)
         {
-            var user = await _userService.GetUserByEmail(email);
+            var user = await _userService.GetByEmail(email);
             if (user == null)
             {
                 return BadRequest("User not found.");
@@ -110,14 +109,14 @@ namespace BlazorSocialNet.Server.Controllers
 
             user.PasswordResetToken = CreateRandomToken();
             user.ResetTokenExpires = DateTime.Now.AddDays(1);
-            await _userService.UpdateUser(user);
+            await _userService.Update(user);
             return Ok("You may now reset your password.");
         }
 
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
         {
-            var user = await _userService.GetUserByToken(request.Token);
+            var user = await _userService.GetByToken(request.Token);
             if (user == null || user.ResetTokenExpires < DateTime.Now)
             {
                 return BadRequest("Invalid Token.");
@@ -129,7 +128,7 @@ namespace BlazorSocialNet.Server.Controllers
             user.PasswordResetToken = null;
             user.ResetTokenExpires = null;
 
-            await _userService.UpdateUser(user);
+            await _userService.Update(user);
 
             return Ok("Password successfully reset.");
         }

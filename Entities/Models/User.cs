@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace BlazorSocialNet.Entities.Models.Authentication
+namespace BlazorSocialNet.Entities.Models
 {
     [Table("Users")]
     public class User
@@ -28,13 +28,13 @@ namespace BlazorSocialNet.Entities.Models.Authentication
         [Column("Description")]
         public string? Description { get; set; }
 
-        [Column("PasswordHash")] 
+        [Column("PasswordHash")]
         public string PasswordHash { get; set; }
 
         [Column("Image")]
         public string? Image { get; set; }
 
-        [Column("Language")] 
+        [Column("Language")]
         public string Language { get; set; } = "uk";
 
         [Column("Location")]
@@ -69,7 +69,7 @@ namespace BlazorSocialNet.Entities.Models.Authentication
         [Column("VerificationToken")]
         public string? VerificationToken { get; set; }
 
-        [Column("VerifiedAt")] 
+        [Column("VerifiedAt")]
         public DateTime? VerifiedAt { get; set; }
 
         [Column("PasswordResetToken")]

@@ -1,8 +1,15 @@
-﻿<h3>Users</h3>
-@page "/users"
+﻿@page "/users"
+@inject IDialogService DialogService
 
+<h3>Users</h3>
+
+<MudButton OnClick="AddUserPopup" Variant="Variant.Filled" Color="Color.Primary">Додати користувача</MudButton>
 <UsersDataGrid></UsersDataGrid>
 
 @code {
-
+    private void AddUserPopup()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<AddUserPopup>("Додати користувача", options);
+    }
 }

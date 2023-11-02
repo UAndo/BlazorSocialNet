@@ -1,0 +1,41 @@
+﻿@using System.ComponentModel.DataAnnotations;
+@using BlazorSocialNet.Client.Services
+@using BlazorSocialNet.Entities.Models;
+@inject IRoleService RoleService;
+
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator/>
+    <MudDialog Style="width:300px;">
+        <DialogContent>
+            <MudCard>
+                <MudCardContent>
+                    <MudTextField Label="Name" HelperText="Role name"
+                                  @bind-Value="model.Name" For="@(() => model.Name)"
+                                  Required="true" RequiredError="User name is required!" />
+                </MudCardContent>
+                <MudCardActions Class="justify-content-end">
+                    <MudButton OnClick="Cancel">Cancel</MudButton>
+                    <MudButton Color="Color.Primary" ButtonType="ButtonType.Submit">Save</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </DialogContent>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+
+    Role model = new Role();
+    bool success;
+
+    private async Task OnValidSubmit(EditContext context)
+    {
+        success = true;
+        model = (Role)context.Model;
+        await RoleService.CreateRole(model);
+        StateHasChanged();
+    }
+}

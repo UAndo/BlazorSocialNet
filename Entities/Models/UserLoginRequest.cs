@@ -1,13 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BlazorSocialNet.Entities.Models.Authentication
+namespace BlazorSocialNet.Entities.Models
 {
     public class UserLoginRequest
     {
-        [Required, EmailAddress] 
+        [Required, EmailAddress]
         public string Email { get; set; } = string.Empty;
 
-        [Required] 
+        [Required]
         public string Password { get; set; } = string.Empty;
     }
 }

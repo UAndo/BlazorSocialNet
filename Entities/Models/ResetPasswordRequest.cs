@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BlazorSocialNet.Entities.Models.Authentication
+namespace BlazorSocialNet.Entities.Models
 {
     public class ResetPasswordRequest
     {
